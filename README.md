@@ -1,122 +1,117 @@
-# Introduction
-## Aircrack-ng for Android
-This repository is a port of the Aircrack-ng 1.2-beta2 suite (except scripts) for Android. It works directly on top of Android.
-This port is done by [KrisWebDev](https://github.com/kriswebdev) and is not "affiliated" with the Aircrack-ng.org team.
+# Hijacker
 
-## Aircrack-ng
-> Aircrack-ng is an 802.11 WEP and WPA-PSK keys cracking program that can recover keys once enough data packets have been captured. It implements the standard FMS attack along with some optimizations like KoreK attacks, as well as the PTW attack, thus making the attack much faster compared to other WEP cracking tools.
+Hijacker is a Graphical User Interface for the penetration testing tools [Aircrack-ng, Airodump-ng](https://www.aircrack-ng.org/), [MDK3](https://tools.kali.org/wireless-attacks/mdk3) and [Reaver](https://tools.kali.org/wireless-attacks/reaver). It offers a simple and easy UI to use these tools without typing commands in a console and copy&pasting MAC addresses.
 
-# Running Aircrack-ng on Android (precompiled)
+This application requires an **ARM** android device with an internal wireless adapter that supports **Monitor Mode**. A few android devices do, but none of them natively. This means that you will need a custom firmware. Any device that uses the BCM4339 chipset (MSM8974, such as Nexus 5, Xperia Z1/Z2, LG G2, LG G Flex, Samsung Galaxy Note 3) will work with [Nexmon](https://github.com/seemoo-lab/nexmon) (which also supports some other chipsets). Devices that use BCM4330 can use [bcmon](http://bcmon.blogspot.gr/).
 
-## Pre-requisites
+An alternative would be to use an external adapter that supports **monitor mode** in Android with an OTG cable.
 
- 1. Device with **WiFi chipset, firmware & driver that support monitor-mode**
-   * As of early 2016, only mass-market compatible devices are thoses having dedicated **Broadcom 4329** or **Broadcom 4330** WiFi chipsets (**Samsung Galaxy S1, Samsung Galaxy S2, Nexus 7, Huawei Honor**). Bcmon team has developed firmware and driver hacks for these chipsets. More recent devices have WiFi digital signal processed by the ARM CPU (Qualcomm or Samsung) and there is no publicily known monitor mode hacks for these devices at this time.
-   * Otherwise, go look for **USB WiFi adapter** known to provide WiFi monitor-mode and injection support on Android.
- 2. **Wireless extensions** enabled in Android kernel
-  * That's normally bundled with the loaders/kernels below.
- 3. Monitor-mode **firmware & driver loader**
-   * Broadcom 4329: Bcmon won't load on CyanogenMod > v7 due to the move from bcm4329 driver to bcmdhd. For Galaxy S1, use [PwnAir](http://forum.xda-developers.com/showthread.php?t=2760170) on a KitKat ROM (or port the open source PwnAir kernel to more recent ROM following PwnAir kernel build instructions at the end of the XDA thread).
-   * Broadcom 4330: Use [bcmon app](http://bcmon.blogspot.com/) (not maintained anymore by their owners) to load the monitor-mode firmware and driver.
-   * USB WiFi adapter that supports monitor-mode: This completely depends on your USB WiFi adapter and is out of scope of this README. You will need to find and build the driver, along with your ROM kernel, from source. Otherwise you would probably face the *magic version* mismatch issue. As Android kernel is a Linux kernel afterall, you should succeed in compiling the driver from the Linux driver source. Either find a nice HowTo for compiling your USB WiFi adapter driver on a defined Android ROM, or struggle with the driver build guide of your Android ROM. Note that some guides use a chrooted Ubuntu or Kali as an alternative to building a pure Android driver.
- 4. [**Android SDK**](https://developer.android.com/sdk/index.html#Other) platform-tools installed on your PC (for install)
+The required tools are included for **ARM** devices.
+The Nexmon firmware and management utility for **BCM4339** and **BCM4358** are also included.
 
-## Install
+Root access is also necessary, as these tools need root to work.
 
-* Load the monitor-mode firmware/driver
-  * Automated: Install [bcmon app](http://bcmon.blogspot.com/) (bcm4330) or [PwnAir kernel+app](http://forum.xda-developers.com/showthread.php?t=2760170) (Samsung Galaxy S1 with KitKat ROM) and load the monitor-mode firmware/driver.
-  * Manual: [LD_PRELOAD the driver](http://forum.xda-developers.com/showthread.php?t=2405208) (bcm4330) or [port PwnAir kernel](http://forum.xda-developers.com/showthread.php?t=2760170) (bcm4329, check XDA thread build instructions section)
-* Install the [wireless extensions binaries](https://github.com/kriswebdev/android_wireless_tools/tree/master/bin) and [aircrack-ng for android binaries](https://github.com/kriswebdev/android_aircrack/tree/master/bin) on the Android device `/system/xbin/` folder:
-```shell
-    adb root
-    adb remount
-    adb push some-binary /system/xbin/
-```
+## Features
+### Information Gathering
+* View a list of access points and stations (clients) around you (even hidden ones)
+* View the activity of a specific network (by measuring beacons and data packets) and its clients
+* Statistics about access points and stations
+* See the manufacturer of a device (AP or station) from the OUI database
+* See the signal power of devices and filter the ones that are closer to you
+* Save captured packets in .cap file
 
-## Run
+### Attacks
+* **Deauthenticate** all the clients of a network (either targeting each one (effective) or without specific target)
+* Deauthenticate a specific client from the network it's connected
+* MDK3 **Beacon Flooding** with custom options and SSID list
+* MDK3 **Authentication DoS** for a specific network or to every nearby AP
+* Capture a **WPA handshake** or gather **IVs** to crack a WEP network
+* **Reaver WPS** cracking (pixie-dust attack using NetHunter chroot and external adapter)
 
-Check your wireless interface status (should be in "Mode: Monitor"):
-```shell
-adb root
-adb shell iwconfig
-```
+### Other
+* Leave the app running in the background, optionally with a notification
+* Copy commands or MAC addresses to clipboard
+* Includes the required tools, no need for manual installation
+* Includes the Nexmon driver, required library and management utility for BCM4339 and BCM4358 devices
+* Set commands to enable and disable monitor mode automatically
+* **Crack .cap files** with a custom wordlist
+* Create **custom actions** and run them on an access point or a client easily
+* Sort and filter Access Points and Stations with many parameters
+* Export all gathered information to a file
+* Add a persistent **alias** to a device (by MAC) for easier identification
 
-Check Airodump is working:
-    `adb shell airodump-ng eth0`
+<img src="https://github.com/chrisk44/Hijacker/raw/master/screenshots/airodump_view.png" width="256" hspace="2"><img src="https://github.com/chrisk44/Hijacker/raw/master/screenshots/mdk_view.png" width="256" hspace="2"><img src="https://github.com/chrisk44/Hijacker/raw/master/screenshots/reaver_view.png" width="256" hspace="2">
 
-Provided your wireless interface is eth0.
+[More Screenshots](https://github.com/chrisk44/Hijacker/tree/master/screenshots)
 
-If it is working, then check the Aircrack documentation for HowTo.
+## Installation
+Make sure:
+* you are on Android 5+
+* you are rooted
+* you have a firmware to support Monitor Mode on your wireless interface
 
-# Building Aircrack-ng on Android
+#### Download the latest version [here](https://github.com/chrisk44/Hijacker/releases).
 
-There is no need to build Aircrack-ng yourself unless you're paranoïd about the binaries I provide, or unless you want to change/upgrade the Aircrack-ng code. Android Aircrack-ng binaries should work on any Android phone. The hard part about running Aircrack-ng on Android is to load a monitor-mode WiFi firmware & driver that works for your phone or USB WiFi adapter: that's where you should focus your efforts instead.
+When you run Hijacker for the first time, you will be asked whether you want to install the nexmon firmware or go to home screen. If you have installed your firmware or use an external adapter, you can just go to the home screen. Otherwise, and if your device is supported, click 'Install Nexmon' to install the Nexmon firmware. When you're done, you will land on the home screen and airodump will start. Make sure you have enabled your WiFi and it's in monitor mode.
 
-## Pre-requisites
+##### Note: On some devices, changing files in `/system` might trigger an Android security feature and your system partition will be restored when you reboot.
 
-### Firmware/driver pre-requisite
+## Troubleshooting
 
-Same pre-requisites applies as for Running. You still need to have a monitor-mode WiFi kernel/driver installed on your Android system prior to using Aicrack for Android.
+#### SU binary not found!
 
-### Preparing the build environment
+Hijacker needs root access to run. It expects a `su` binary file, which is a shell executed with root privileges. On startup, the app runs a `which su` command. If you are getting this message, then this command has failed. Either you are not rooted, or your root solution did not provide a `su` binary in a PATH accessible directory.
 
-Instructions are made for CyanogenMod platform build system, as it includes all the necessary libraries and tools.
+#### No root access
 
-> Warning: Compilation has not been tested on Android NDK system build alone, without all the platform tools. Building only with Android NDK instead of CyanogenMod platform build system would require you to have have at least the following sources located in an folder called "external" (check Android.mk):
->  * Aircrack-ng for Android (android_aircrack)
->  * OpenSSL development package (openssl)
->  * SQLite development package `>= 3.3.17` (3.6.X version or better is recommended): `libsqlite3-devel`
->  * zlib (or change the Andorid.mk flags to use -LDLIB)
+Hijacker needs root access to run. It runs all its commands through `su`. When `su` is called, some app on your device (which manages the root access, e.g. SuperSU, Superuser) should ask you if you want to grant root access to Hijacker. If access is denied, you get this message. Make sure that Hijacker is authorized to run root commands.
 
- * Follow [Cyanogenmod build guide](http://wiki.cyanogenmod.org/w/Build_Guides) for your device but stop before "brunch". You need several GB of disk space and a good Internet connection.
- * Copy this Aircrack-ng for Android repository content to a directory named "aircrack-ng" in CyanogenMod source root "external" folder.
+#### Directory 'bin/lib' could not be created
 
-### Building wireless tools binaries
+This means that the app failed to create the 'bin' or 'lib' directories in its own directory within the system. If you see this, something is wrong with your OS, Hijacker can't do anything about this.
 
-If you also want to build the [Android wireless tools](https://github.com/kriswebdev/android_wireless_tools/) instead of using the Android wireless tools [precompiled binaries](https://github.com/kriswebdev/android_wireless_tools/tree/master/bin), then download and put the [Android wireless tools](https://github.com/kriswebdev/android_wireless_tools/) in CyanogenMod "external" folder and run from the CM source root (`croot`): 
+#### The architecture of this device is not ARM.
 
-```shell
-. build/envsetup.sh
-breakfast galaxysmtd
-export USE_CCACHE=1
-mka iwconfig
-mka iwpriv
-adb root
-adb remount
-adb push $OUT/system/bin/iwconfig /system/xbin/
-adb push $OUT/system/bin/iwpriv /system/xbin/
-```
+This app is designed and tested for ARM devices. All the included binaries and libraries are compiled for that architecture and will not work on anything else. If you get this message, you have to install them manually ([busybox](https://play.google.com/store/apps/details?id=stericson.busybox&hl=el), aircrack-ng suite, mdk3, reaver, [wireless tools](https://hewlettpackard.github.io/wireless-tools/Tools.html), [libfakeioctl.so](https://github.com/seemoo-lab/nexmon/tree/master/utilities/libfakeioctl) library) **in a PATH accessible directory** and set the 'Prefix' option for the tools to preload the library they need: `LD_PRELOAD=/path/to/libfakeioctl.so`.
 
-And so on for all tools listed in [Android wireless tools Android.mk](https://github.com/kriswebdev/android_wireless_tools/blob/master/Android.mk). Replace galaxysmtd by your device CyanogenMod name.
+#### Hijacker watchdog detected a problem
 
-## Building Aicrack-ng binaries for Android
+Hijacker runs a background service to make sure that the tools that are supposed to be running, are actually running, and the tools that are supposed to be stopped, are stopped. In the event one of these checks fails, you will get a warning.
 
-The following commands have to be run from the CyanogenMod android source directory (croot).
+*Something is not running*: This could be caused by a tool stopping unexpectedly, which could be a sign of bad parameters, tool working differently that the app expects, other software on the device killing it, wifi turned off or not in monitor mode, or even a broken tool (if you compiled it manually).
 
- * Edit `. external/aircrack-ng/make_aircrack.sh` and replace "galaxysmtd" with your device [CyanogenMod code](http://wiki.cyanogenmod.org/w/Devices), should it have any impact at all.
+*Something is still running*: This could be caused by a failed 'stop' operation by the app or the tool running on its own (if you have left the app open in the background and you run the tool by yourself). A failed 'stop' operation could be caused by denied root access, or starting the app after it crashed and didn't get a change to run the 'stop' operations (although this shouldn't happen).
+  
+#### Can't open shell to generate the bug report
 
- * Compilation:
+The app crashed, a new activity came up, and it says it can't open a shell to generate the bug report. This means exactly what it says. It can't open a root shell; it executed `su` and failed. No/denied or improperly configured root access.
+Hijacker needs root access to generate the bug report because it needs to get the device's logfiles, attempt to run the tools to make sure they are installed correctly, read the WiFi firmware, etc.
 
-    `. external/aircrack-ng/make_aircrack.sh`
+#### Can\'t create report (external storage write access denied)
 
- * Push binaries to the device (through adb, USB debugging mode must be enabled on the device):
+Self explanatory.
 
-     `. external/aircrack-ng/push_aircrack.sh`
+### Miscellaneous
 
- * Re-compile and push:
+In settings, there is an option to test the tools. If something goes wrong, you can click 'Copy test command' and select the tool that fails. This will copy a test command to your clipboard, which you can manually run in a **root** shell and see what's wrong. If all the tests pass and you still have a problem, feel free to open an issue here to fix it, or use the 'Send feedback' option in the app's settings.
 
-     `mmmp external/aircrack-ng`
+If the app happens to crash, a new activity will come up with the option to submit a bug report via email. You can see exactly what the report contains, it's a simple text file. This will be very helpful for the development of Hijacker, but keep in mind that the app contains *filtered* device logs, which may contain information like MAC addresses, SSIDs, device details etc.
 
- * Checking (provided that monitor mode is enabled on your device and that interface name is eth0):
+Keep in mind that Hijacker is just a GUI for these tools. The way it runs the tools is fairly simple, and if all the tests pass and you are in monitor mode, you should be getting the results you want. Also keep in mind that these are **auditing** tools. This means that they are used to **test** the integrity of your network, so there is a chance (and you should hope for it) that the attacks don't work on your network. However, if an attack works when you type a command in a terminal, but not with the app, feel free to post here to resolve the issue. This app is still under development so bugs are to be expected.
 
-    `adb shell airodump-ng eth0`
+#### Do not report bugs for devices that are not supported or when you are using an outdated version.
 
-# Documentation
+## Warning
+### Legal
+It is illegal to use this application against networks for which you don't have permission. You can use it only on **your** network or a network that you are authorized to. Using software that uses a network adapter in promiscuous mode may be considered illegal even without actively using it against someone. I am not responsible for how you use this application and any damages you may cause.
 
-## Aircrack-ng official documentation 
-> Documentation, tutorials, ... can be found on http://www.aircrack-ng.org
-> See also manpages and the forum.
+### Device
+The app gives you the option to install the Nexmon firmware on your device. Even though the app performs a chipset check, mistakes happen. The app currently includes the Nexmon firmware for BCM4339 and BCM4358 *only*. Installing the wrong firmware on a device may damage it (and I mean hardware, not something that is fixable with factory reset). I am not responsible for any damage caused to you, your device, your house, your cat, or anyne and anything else, by this software.
 
-## Aircrack-ng for Android
+#### Consider yourself warned.
 
-Support Aircrack-ng for Android is done on [XDA PwnAir thread](http://forum.xda-developers.com/showthread.php?t=2760170) Q&A section or on the [GitHub repo](https://github.com/kriswebdev/android_aircrack/).
+## Donate
+
+If you like my work, you can buy me a beer. :)
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VV5TEHL8S6UQ2)
