@@ -14,6 +14,10 @@
           <option name="url" value="https://github.com/aircrack-ng/aircrack-ng-archive.git" />
           <option name="userName" value="" />
         </UrlAndUserName>
+        <UrlAndUserName>
+          <option name="url" value="https://github.com/kriswebdev/android_aircrack.git" />
+          <option name="userName" value="" />
+        </UrlAndUserName>
       </list>
     </option>
     <option name="cloneParentDir" value="C:\Users\CLX Ra\Desktop\Markpoint" />
